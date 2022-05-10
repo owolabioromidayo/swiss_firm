@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "string_view": "c"
+        "string_view": "c",
+        "ds18b20.h": "c",
+        "bme680.h": "c"
     }
 }
