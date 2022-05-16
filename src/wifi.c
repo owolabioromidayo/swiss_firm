@@ -2,8 +2,13 @@
 #include "wifi.h"
 
 //ensure you change this before deployment
-#define WIFI_SSID "esp32_ap1"
+
+
+// #define WIFI_SSID "esp32_ap1"
 #define WIFI_PWD "reconnect"
+
+#define WIFI_SSID "NokiaG20"
+#define WIFI_PASS "nicetryu"
 
 #define WIFI_CHANNEL 11
 #define MAX_CONN_CNT 1
@@ -15,7 +20,6 @@
 #define W_SIZE 20 //wifi ssid/pass max len
 // #define NO_CONFIG_WIFI 1
 // #define CONFIG_WIFI 0
-
 
 static const char *TAG = "wifi_service";
 static const char *HTML_FORM = "<html><form action=\"/\" method=\"post\">"
@@ -44,14 +48,51 @@ static esp_err_t handle_http_event(esp_http_client_event_t *);
 // static void handle_wifi_connection(void *, esp_event_base_t, int32_t, void *);
 
 
-void init_wifi(void){
+wifi_err_t init_wifi(void){
     if (nvs_flash_init() != ESP_OK){
         nvs_flash_erase();
         nvs_flash_init();
+        printf("NVS CLEARED\n");
+    }else{
+        printf("NVS_ERR\n");
     }
 
     esp_netif_init(); //Initialize the underlying TCP/IP stack.
-    ensure_wifi_details();
+    // ensure_wifi_details();
+
+    //temp use known AP
+    wifi_config_t wifi_config = {
+        .sta = {
+            .ssid = WIFI_SSID,
+            .password = WIFI_PASS,
+            .threshold.authmode = WIFI_AUTH_WPA2_PSK,
+            .pmf_cfg = {
+                .capable = true,
+                .required = false},
+        },
+    };
+
+    esp_netif_create_default_wifi_sta();
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    esp_wifi_init(&cfg);
+    esp_wifi_set_mode(WIFI_MODE_STA);
+    esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config);
+    esp_wifi_start();
+    esp_wifi_connect();
+
+    esp_http_client_config_t config = {
+    .url = "http://www.google.com",
+    .event_handler = handle_http_event,
+    };
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+
+    if (esp_http_client_perform(client) != ESP_OK)
+    {
+        ESP_LOGE(TAG, "http request failed");
+    }
+
+    esp_http_client_cleanup(client);
+    
 }
 
 
@@ -255,11 +296,11 @@ static esp_err_t handle_http_form_post(httpd_req_t *req){
 
     // }
 
-    httpd_resp_send(req, "Received.", HTTPD_RESP_USE_STRLEN);
+    return httpd_resp_send(req, "Received.", HTTPD_RESP_USE_STRLEN);
 
-    char *ssid = "NokiaG20";
-    char *pass = "nicetryu";
-    return test_wifi_from_webserver(ssid, pass);
+    // char *ssid = "NokiaG20";
+    // char *pass = "nicetryu";
+    // return test_wifi_from_webserver(ssid, pass);
 
 }
 
@@ -282,8 +323,12 @@ static void start_form_webserver(void){
     httpd_handle_t server = NULL;
     if (httpd_start(&server, &config) == ESP_OK)
     {
+        printf("HTTP CONFIG SET!\n");
         httpd_register_uri_handler(server, &uri_get);
         httpd_register_uri_handler(server, &uri_post);
+        printf("HTTP HANDLERS SET!\n");
+    }else{
+        printf("Failed to start HTTP server! \n");
     }
 }
 

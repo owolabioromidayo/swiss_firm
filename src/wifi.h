@@ -15,8 +15,14 @@
 #include "esp_http_server.h"
 #include <string.h>
 
+typedef int wifi_err_t;
 
-void init_wifi(void);
+#define WIFI_ERR 0
+#define WIFI_OK 1
+
+
+wifi_err_t init_wifi(void);
+wifi_err_t post_data(float temp);
 
 
 #endif //PROJ_WIFI_H_
