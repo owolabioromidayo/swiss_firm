@@ -3,7 +3,7 @@
 
 static void init_hw(void);
 
-void measure_windspeed(void)
+float measure_windspeed(void)
 {
     init_hw();
     int64_t start = esp_timer_get_time();

@@ -3,7 +3,7 @@
 
 static void init_hw(void);
 
-void measure_rainfall(void)
+float measure_rainfall(void)
 {
     init_hw();
     
