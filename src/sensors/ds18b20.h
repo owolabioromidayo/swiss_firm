@@ -3,8 +3,8 @@
 
 #include <ds18x20.h>
 #include "driver/gpio.h"
+#include "../config.h"
 
-#define DSB_PIN 21
 #define MAX_SENSORS 8
 
 float get_ext_temp(void);
