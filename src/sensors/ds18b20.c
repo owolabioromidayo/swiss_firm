@@ -16,6 +16,7 @@ static void init_hw(void){
     while (sensor_count == 0){
         sensor_count = ds18x20_scan_devices((gpio_num_t)GPIO_DSB, addrs, MAX_SENSORS, &found);
         printf("SENSOR COUNT %d \n", found);
+        sensor_count = found;
     }
     if (sensor_count > MAX_SENSORS){
         sensor_count = MAX_SENSORS;

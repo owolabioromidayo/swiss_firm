@@ -1,7 +1,7 @@
 #include "./bme680.h"
 
 bme680_values_float_t bme680_get_values(void){
-
+    printf("ABOUT TO TAKE READINGS 0 \n");
     ESP_ERROR_CHECK(i2cdev_init());
 
     bme680_values_float_t values;
@@ -9,10 +9,16 @@ bme680_values_float_t bme680_get_values(void){
 
     memset(&sensor, 0, sizeof(bme680_t));
 
-    ESP_ERROR_CHECK(bme680_init_desc(&sensor, BME680_I2C_ADDR_0, PORT, GPIO_BME680_SDA, GPIO_BME680_SCL));
+    printf("ABOUT TO TAKE READINGS 1 \n");
+    ESP_ERROR_CHECK(bme680_init_desc(&sensor, BME680_I2C_ADDR_1, 0, GPIO_BME680_SDA, GPIO_BME680_SCL));
 
     // init the sensor
-    ESP_ERROR_CHECK(bme680_init_sensor(&sensor));
+
+    printf("ABOUT TO TAKE READINGS 2 \n");
+    bme680_init_sensor(&sensor);
+
+    printf("ABOUT TO TAKE READINGS 3 \n");
+
 
     // Changes the oversampling rates to 4x oversampling for temperature
     // and 2x oversampling for humidity. Pressure measurement is skipped.
@@ -33,6 +39,8 @@ bme680_values_float_t bme680_get_values(void){
     bme680_get_measurement_duration(&sensor, &duration);
 
     TickType_t last_wakeup = xTaskGetTickCount();
+
+    printf("ABOUT TO TAKE READINGS\n");
 
     for(int i=0; i< 10; ++i)
     {

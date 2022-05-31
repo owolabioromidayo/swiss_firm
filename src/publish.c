@@ -39,11 +39,11 @@ int send_post(){ // part of wifi service?
     struct Values v = gather_data();
     printf("%f TEMPERATURE  \n", v.temp);
 
-    bme680_values_float_t bme_vals = bme680_get_values();
-    v.humidity  = bme_vals.humidity;
-    v.baro_pressure  = bme_vals.pressure;
-    v.temp  = bme_vals.temperature;
-    v.air_quality = bme_vals.gas_resistance;
+    // // bme680_values_float_t bme_vals = bme680_get_values();
+    // v.humidity  = bme_vals.humidity;
+    // v.baro_pressure  = bme_vals.pressure;
+    // v.temp  = bme_vals.temperature;
+    // v.air_quality = bme_vals.gas_resistance;
     
 
 
