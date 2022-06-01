@@ -2,12 +2,12 @@
 // #include "storage.h"
 // #include "publish.h"
 
-// #include "freertos/FreeRTOS.h"
-// #include "freertos/task.h"
-// #include "freertos/event_groups.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/event_groups.h"
 #include <stdio.h>
 // #include "sensors/bme680.h"
-#include "sensors/ds18b20.h"
+#include "sensors/raingauge.h"
 
 
 void app_main(void)
@@ -24,9 +24,10 @@ void app_main(void)
     // send_post(62.8);
 
 
-    //test bme
-    float values = get_ext_temp();
-    // xTaskCreate(bme680_get_values, "bme680", 10 * configMINIMAL_STACK_SIZE, NULL, 5, NULL);
-    printf("GOTTEN BME VALUES \n");
+    float rainfall = 0.0;
+    xTaskCreatePinnedToCore(measure_rainfall, "measure_rainfall", 4096, (void *)&rainfall, 10, NULL, 1);
+    vTaskDelay((TickType_t)(23*1000 / portTICK_PERIOD_MS));
+    printf("Rainfall: %f\n", rainfall);
     
+    return;
 }
