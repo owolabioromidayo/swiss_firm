@@ -1,4 +1,5 @@
 #include "wifi.h"
+#include "wifi_manager.h"
 // #include "storage.h"
 #include "publish.h"
 #include "freertos/FreeRTOS.h"
