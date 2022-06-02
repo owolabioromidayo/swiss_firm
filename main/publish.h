@@ -3,9 +3,10 @@
 
 #include "sensors/ds18b20.h"
 #include "sensors/bme680.h"
+#include "wifi.h"
+#include "types.h"
 
 
 int send_post();
-
 
 #endif //PROJ_PUBLISH_H_

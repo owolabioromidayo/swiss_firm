@@ -1,4 +1,4 @@
-#include "./adc_readings.h"
+#include "adc_readings.h"
 
 #define SAMPLE_CNT 30
 static const adc1_channel_t adc_battery_channel = ADC_BATTERY_PIN;

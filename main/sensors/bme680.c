@@ -1,24 +1,15 @@
 #include "./bme680.h"
 
 bme680_values_float_t bme680_get_values(void){
-    printf("ABOUT TO TAKE READINGS 0 \n");
-    ESP_ERROR_CHECK(i2cdev_init());
 
     bme680_values_float_t values;
     bme680_t sensor;
 
     memset(&sensor, 0, sizeof(bme680_t));
 
-    printf("ABOUT TO TAKE READINGS 1 \n");
     ESP_ERROR_CHECK(bme680_init_desc(&sensor, BME680_I2C_ADDR_1, 0, GPIO_BME680_SDA, GPIO_BME680_SCL));
 
-    // init the sensor
-
-    printf("ABOUT TO TAKE READINGS 2 \n");
     bme680_init_sensor(&sensor);
-
-    printf("ABOUT TO TAKE READINGS 3 \n");
-
 
     // Changes the oversampling rates to 4x oversampling for temperature
     // and 2x oversampling for humidity. Pressure measurement is skipped.
@@ -40,8 +31,6 @@ bme680_values_float_t bme680_get_values(void){
 
     TickType_t last_wakeup = xTaskGetTickCount();
 
-    printf("ABOUT TO TAKE READINGS\n");
-
     for(int i=0; i< 10; ++i)
     {
         // trigger the sensor to start one TPHG measurement cycle
@@ -58,6 +47,5 @@ bme680_values_float_t bme680_get_values(void){
         // passive waiting until 1 second is over
         vTaskDelayUntil(&last_wakeup, pdMS_TO_TICKS(1000));
     }
-
     return values;
 }

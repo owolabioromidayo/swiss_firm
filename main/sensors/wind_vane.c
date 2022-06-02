@@ -1,4 +1,5 @@
 #include "./wind_vane.h"
+#include "driver/adc.h"
 
 #define SAMPLE_CNT 30
 
@@ -35,6 +36,7 @@ char *getWindDirection(){
     //calculate with voltage divider from documentation. finalize this when the circuit is in place
     int analog_voltage_map[15] = {150, 300, 450, 600, 830, 1100, 1500, 1700, 2250, 2350, 2700, 3000, 3200, 3400, 3900};
     
+    //update this to use weatherbit specifications
     char* wind_dir_map[15] = {"157.5", "180", "247.5", "202.5", "225", "270", "292.5", "112.5", "135", "337.5", "315", "67.5", "90", "22.5", "45"};
     char* wind_cardinal_map[15] = {"SSE", "S", "WSW", "SSW", "SW", "W", "WNW", "ESE", "SE", "NNW", "NW", "ENE", "E", "NNE", "NE"};
 
