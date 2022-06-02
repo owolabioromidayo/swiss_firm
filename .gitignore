@@ -1,6 +1,6 @@
 .pio
-.vscode/
+.vscode/*
 main/config.h
 main/server_cert.pem
-build/
+build/*
 .sdkconfig
