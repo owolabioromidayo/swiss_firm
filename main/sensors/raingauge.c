@@ -28,7 +28,7 @@ void measure_rainfall(void *pvParameters)
 
     vTaskDelay((TickType_t)(time_period*1000 / portTICK_PERIOD_MS)); //wait for 20s to pick up any rain rick interrupts
 
-    float ret = 0.2794*(tick_count+1) * tick_multiplier ; // estimate hourly precipitation from time period (mm/hour)
+    float ret = 0.2794*(tick_count) * tick_multiplier ; // estimate hourly precipitation from time period (mm/hour)
 
     *(float *)pvParameters = ret; //save into passred rainfall
     tick_count = 0; //reset tickCount
@@ -60,7 +60,8 @@ static void rain_int_consumer(void *pvParameters)
     {
         if (xQueueReceive(rain_int_queue, &_interrupt, portMAX_DELAY))
         {
-            tick_count += _interrupt;
+            // tick_count += _interrupt;
+            tick_count += 1; //interrupts now only occur when theres a tick
             printf("RECEIVED INTERRUPT, TICK COUNT : %i ; LEVEL: %i \n", tick_count, _interrupt);
         }
     }

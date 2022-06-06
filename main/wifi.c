@@ -33,7 +33,7 @@ wifi_err_t post_data(sensor_values_t v)
         .url = HOSTNAME,
         .event_handler = handle_http_event,
         .method = HTTP_METHOD_POST,
-        // .cert_pem = cert
+        // .cert_pem = ca_cert
     };
     esp_http_client_handle_t client = esp_http_client_init(&config);
 
