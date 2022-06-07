@@ -4,6 +4,7 @@
 #include "driver/adc.h"
 #include "config.h"
 
+
 int get_battery_percentage(void);
 double get_solar_irradiance(void);
 

@@ -3,7 +3,10 @@
 
 #include "../config.h"
 
-void measure_rainfall(void *pvParameters);
+// void measure_rainfall(void *pvParameters);
+
+void attach_raingauge_interrupt(void);
+// void handle_new_rain_tick(TickType_t *now, TickType_t *next, int *rainTicks);
                                            
 #endif // PROJ_SENSOR_RAINGAUGE_H_
 
