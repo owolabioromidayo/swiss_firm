@@ -1,5 +1,6 @@
 #include "./wind_vane.h"
 #include "driver/adc.h"
+#include <stdio.h>>
 
 #define SAMPLE_CNT 30
 
@@ -34,6 +35,7 @@ char *getWindDirection(){
     // for reporting windDirTable3V[ix].dir_Cnt++; prevWindIdx = ix; break; } }
 
     //calculate with voltage divider from documentation. finalize this when the circuit is in place
+    printf("In get delay func \n");
     int analog_voltage_map[15] = {150, 300, 450, 600, 830, 1100, 1500, 1700, 2250, 2350, 2700, 3000, 3200, 3400, 3900};
     
     //update this to use weatherbit specifications
@@ -44,6 +46,7 @@ char *getWindDirection(){
     for (int i = 0; i < SAMPLE_CNT; ++i)
     {
         adc_val += adc1_get_raw(adc_channel);
+        printf("new ADC Val: %d \n", adc_val);
     }
 
     uint32_t vin = adc_val / SAMPLE_CNT; //average reading

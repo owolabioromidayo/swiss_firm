@@ -13,6 +13,8 @@
 #include "esp_timer.h"
 #include "esp_log.h"
 
+#include "sensors/wind_vane.h"
+#include "sensors/anemometer.h"
 
 #define TAG "weather_station"
 // #define HOUR_MICROS 60*60*1000000
@@ -34,34 +36,49 @@ static void wakeup_reason(void);
 static void handle_rain_tick(void);
 static void handle_hourly_tick(void);
 
+
+
 void app_main(void)
 {
     ESP_LOGI(TAG, "IN MAIN FUNC \n");
-    if(elapsed_time == 0)
-        time(&elapsed_time);
+    // if(elapsed_time == 0)
+    //     time(&elapsed_time);
     
-    while(1){
-        ESP_LOGI(TAG, "IN LOOP");
+    float windspeed = 0;
+    int battery_percentage = 0;
+    init_anemometer_hw();
+    // while(1){
+    //     ESP_LOGI(TAG, "IN LOOP");
 
-        wakeup_reason();
-        if (wifi_enable)
-        {
-            //setup everything here again
-            // wifi_manager_start();
-            // wifi_manager_set_callback(WM_EVENT_STA_GOT_IP, &cb_connection_ok);
-        }
+    //     wakeup_reason();
+    //     if (wifi_enable)
+    //     {
+    //         //setup everything here again
+    //         // wifi_manager_start();
+    //         // wifi_manager_set_callback(WM_EVENT_STA_GOT_IP, &cb_connection_ok);
+    //     }
 
 
-        // xTaskCreatePinnedToCore(measure_rainfall, "measure_rain  fall", 4096, (void *)&rainfall, 10, NULL, 1);
-        // vTaskDelay((TickType_t)(23*1000 / portTICK_PERIOD_MS));
-        // int percentage = get_battery_percentage();
-        // ESP_LOGI(TAG, "Battery Percentage: %d percent. \n", percentage);
+    //     // // xTaskCreatePinnedToCore(measure_rainfall, "measure_rain  fall", 4096, (void *)&rainfall, 10, NULL, 1);
+    //     // // vTaskDelay((TickType_t)(23*1000 / portTICK_PERIOD_MS));
+    //     // // int percentage = get_battery_percentage();
+    //     // // ESP_LOGI(TAG, "Battery Percentage: %d percent. \n", percentage);
 
-        esp_sleep_enable_timer_wakeup(SLEEP_TIME_MIN*60*SEC_MICROS);
-        esp_sleep_enable_ext0_wakeup(GPIO_RAINGAUGE, 0);
-        ESP_LOGI(TAG, "Entering DEEP SLEEP \n");
-        esp_deep_sleep_start();
-    }
+    //     esp_sleep_enable_timer_wakeup(SLEEP_TIME_MIN*60*SEC_MICROS);
+    //     // esp_sleep_enable_ext0_wakeup(GPIO_RAINGAUGE, 0);
+    //     esp_sleep_enable_ext0_wakeup(GPIO_ANEMOMETER, 0);
+    //     ESP_LOGI(TAG, "Entering DEEP SLEEP \n");
+    //     esp_deep_sleep_start();
+        
+
+
+        xTaskCreatePinnedToCore(measure_windspeed, "measure_windspeed", 8000, (void *)&windspeed, 10, NULL, 0);
+        // xTaskCreatePinnedToCore(get_battery_percentage, "get battery percentage", 4096, (void *)&battery_percentage, 10, NULL, 1);
+       
+        // printf("PERCENTAGE: %d\n", get_battery_percentage());
+        vTaskDelay((TickType_t)(10*1000 / portTICK_PERIOD_MS));
+        printf("Windspeed: %f m/s \n", windspeed);
+    // }
 
     return;
 }
@@ -75,12 +92,14 @@ static void wakeup_reason(void){
     {
     //Rain Tip Gauge
     case ESP_SLEEP_WAKEUP_EXT0 :
-        ESP_LOGI(TAG, "Wakeup caused by external signal using RTC_IO\n");
+        ESP_LOGI(TAG, "Wakeup caused by external signal from EXT0\n");
         wifi_enable = false;
         handle_rain_tick();
         ESP_LOGI(TAG, "RainTicks: %d \n", rainTicks);
         break;
 
+
+        
     case ESP_SLEEP_WAKEUP_TIMER:
         ESP_LOGI(TAG, "Wakeup caused by timer\n");
         wifi_enable = true;
@@ -93,7 +112,14 @@ static void wakeup_reason(void){
         // attach_raingauge_interrupt();
         break;
     }
-    handle_hourly_tick();
+
+    // float windSpeed = 0;
+    // xTaskCreatePinnedToCore(measure_windspeed, "measure_windspeed", 2048, (void *)&windSpeed, 10, NULL, 1);
+    // vTaskDelay((TickType_t)(17*1000 / portTICK_PERIOD_MS));
+    // printf("Wind Speed recorded: %f \n", windSpeed);
+
+    // getWindDirection();
+    // handle_hourly_tick();
 }
 
 static void handle_hourly_tick(void)
@@ -121,6 +147,7 @@ static void handle_rain_tick()
     rainTicks++;
    
 }
+
 // static void cb_connection_ok(void *pvParameters)
 // {
 //     //here we get all the values to send
