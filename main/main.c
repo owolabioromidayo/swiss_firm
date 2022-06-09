@@ -6,7 +6,6 @@
 #include "freertos/task.h"
 // #include "freertos/event_groups.h"
 // #include <stdio.h>
-#include "sensors/raingauge.h"
 #include "adc_readings.h"
 #include "esp_sleep.h"
 #include "driver/rtc_io.h"
@@ -44,8 +43,9 @@ void app_main(void)
     // if(elapsed_time == 0)
     //     time(&elapsed_time);
     
-    float windspeed = 0;
-    int battery_percentage = 0;
+    // float windspeed = 0;
+    // int battery_percentage = 0;
+    char windDirection[4];
     init_anemometer_hw();
     // while(1){
     //     ESP_LOGI(TAG, "IN LOOP");
@@ -72,12 +72,19 @@ void app_main(void)
         
 
 
-        xTaskCreatePinnedToCore(measure_windspeed, "measure_windspeed", 8000, (void *)&windspeed, 10, NULL, 0);
-        // xTaskCreatePinnedToCore(get_battery_percentage, "get battery percentage", 4096, (void *)&battery_percentage, 10, NULL, 1);
+        // xTaskCreatePinnedToCore(measure_windspeed, "measure_windspeed", 8000, (void *)&windspeed, 10, NULL, 0);
+        // // xTaskCreatePinnedToCore(get_battery_percentage, "get battery percentage", 4096, (void *)&battery_percentage, 10, NULL, 1);
        
-        // printf("PERCENTAGE: %d\n", get_battery_percentage());
-        vTaskDelay((TickType_t)(10*1000 / portTICK_PERIOD_MS));
-        printf("Windspeed: %f m/s \n", windspeed);
+        // // printf("PERCENTAGE: %d\n", get_battery_percentage());
+        // vTaskDelay((TickType_t)(10*1000 / portTICK_PERIOD_MS));
+        // printf("Windspeed: %f m/s \n", windspeed);
+    while(1){
+        getWindDirection(&windDirection);
+        printf("Direction: %s \n", windDirection);
+        // vTaskDelay((TickType_t)(1*1000 / portTICK_PERIOD_MS));
+       
+    }
+
     // }
 
     return;
@@ -109,7 +116,6 @@ static void wakeup_reason(void){
     default :
         ESP_LOGI(TAG, "Wakeup was not caused by deep sleep: %d\n", wakeup_reason);
         wifi_enable = true;
-        // attach_raingauge_interrupt();
         break;
     }
 
