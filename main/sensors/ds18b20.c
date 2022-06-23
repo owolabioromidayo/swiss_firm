@@ -1,7 +1,7 @@
 #include "./ds18b20.h"
 #include <stdio.h>
 
-#define DSB_SAMPLE_CNT 10
+#define DSB_SAMPLE_CNT 5
 
 static ds18x20_addr_t addrs[MAX_SENSORS];
 static int sensor_count = 0;
@@ -38,11 +38,5 @@ static void init_hw(void)
         sensor_count = found;
     }
     if (sensor_count > MAX_SENSORS)
-    {
         sensor_count = MAX_SENSORS;
-    }
 }
-
-
-//also we should warm it up before hand
-//eventually we will want to get the median of 3 readings for better accuracy

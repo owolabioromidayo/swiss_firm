@@ -15,4 +15,10 @@ typedef struct sensor_values_t
     float rainfall;
 } sensor_values_t;
 
+typedef struct wvane_ret
+{
+    float analog;
+    int pos;
+}wvane_ret;
+
 #endif //PROJ_TYPES_H_

@@ -12,8 +12,12 @@
 #include "esp_timer.h"
 #include "esp_log.h"
 
+#include "types.h"
+
 #include "sensors/wind_vane.h"
+#include "sensors/bme680.h"
 #include "sensors/anemometer.h"
+#include "sensors/ds18b20.h"
 
 #define TAG "weather_station"
 // #define HOUR_MICROS 60*60*1000000
@@ -30,6 +34,9 @@ static RTC_DATA_ATTR time_t next = 0;
 static bool wifi_enable = true;
 
 
+char* wind_cardinal_map[16] = { "ESE", "ENE", "E", "SSE", "SE", "SSW", "S", "NNE", "NE", "WSW","SW", "NNW", "N"
+                            "WNW","NW", "W"};
+
 // static void cb_connection_ok(void *pvParameters);
 static void wakeup_reason(void);
 static void handle_rain_tick(void);
@@ -39,49 +46,58 @@ static void handle_hourly_tick(void);
 
 void app_main(void)
 {
-    ESP_LOGI(TAG, "IN MAIN FUNC \n");
+    // ESP_LOGI(TAG, "IN MAIN FUNC \n");
     // if(elapsed_time == 0)
     //     time(&elapsed_time);
     
-    // float windspeed = 0;
+    float windspeed = 0;
     // int battery_percentage = 0;
-    char windDirection[4];
+    bool vane_cali_enable = init_wind_vane_adc();
     init_anemometer_hw();
-    // while(1){
-    //     ESP_LOGI(TAG, "IN LOOP");
+    while(1){
+        // ESP_LOGI(TAG, "IN LOOP");
 
-    //     wakeup_reason();
-    //     if (wifi_enable)
-    //     {
-    //         //setup everything here again
-    //         // wifi_manager_start();
-    //         // wifi_manager_set_callback(WM_EVENT_STA_GOT_IP, &cb_connection_ok);
-    //     }
+        // wakeup_reason();
+        // if (wifi_enable)
+        // {
+            //setup everything here again
+            // wifi_manager_start();
+            // wifi_manager_set_callback(WM_EVENT_STA_GOT_IP, &cb_connection_ok);
+        // }
 
 
-    //     // // xTaskCreatePinnedToCore(measure_rainfall, "measure_rain  fall", 4096, (void *)&rainfall, 10, NULL, 1);
-    //     // // vTaskDelay((TickType_t)(23*1000 / portTICK_PERIOD_MS));
-    //     // // int percentage = get_battery_percentage();
-    //     // // ESP_LOGI(TAG, "Battery Percentage: %d percent. \n", percentage);
 
-    //     esp_sleep_enable_timer_wakeup(SLEEP_TIME_MIN*60*SEC_MICROS);
-    //     // esp_sleep_enable_ext0_wakeup(GPIO_RAINGAUGE, 0);
-    //     esp_sleep_enable_ext0_wakeup(GPIO_ANEMOMETER, 0);
-    //     ESP_LOGI(TAG, "Entering DEEP SLEEP \n");
-    //     esp_deep_sleep_start();
+        bme680_get_values();
+        vTaskDelay((TickType_t)(1*1000 / portTICK_PERIOD_MS));
+        // get_ext_temp();
+        // xTaskCreatePinnedToCore(measure_windspeed, "measure_windspeed", 8000, (void *)&windspeed, 10, NULL, 0);
+        // if (vane_cali_enable)
+        // {
+        //     wvane_ret a  = getWindDirection();
+        //     vTaskDelay((TickType_t)(1*1000 / portTICK_PERIOD_MS));
+        //     char* winw  = wind_cardinal_map[a.pos];
+        //     printf("Analog: %f, Direction: %d \n", a.analog, a.pos);
+        // }
+        // // xTaskCreatePinnedToCore(measure_rainfall, "measure_rain  fall", 4096, (void *)&rainfall, 10, NULL, 1);
+        // vTaskDelay((TickType_t)(10*1000 / portTICK_PERIOD_MS));
+        // // int percentage = get_battery_percentage();
+        // // ESP_LOGI(TAG, "Battery Percentage: %d percent. \n", percentage);
+
+        // esp_sleep_enable_timer_wakeup(SLEEP_TIME_MIN*60*SEC_MICROS);
+        // esp_sleep_enable_ext0_wakeup(GPIO_RAINGAUGE, 0);
+        // esp_sleep_enable_ext0_wakeup(GPIO_ANEMOMETER, 0);
+
+        // ESP_LOGI(TAG, "Entering DEEP SLEEP \n");
+        // esp_deep_sleep_start();
         
 
 
-        // xTaskCreatePinnedToCore(measure_windspeed, "measure_windspeed", 8000, (void *)&windspeed, 10, NULL, 0);
-        // // xTaskCreatePinnedToCore(get_battery_percentage, "get battery percentage", 4096, (void *)&battery_percentage, 10, NULL, 1);
+        // xTaskCreatePinnedToCore(get_battery_percentage, "get battery percentage", 4096, (void *)&battery_percentage, 10, NULL, 1);
        
-        // // printf("PERCENTAGE: %d\n", get_battery_percentage());
+        // printf("PERCENTAGE: %d\n", get_battery_percentage());
         // vTaskDelay((TickType_t)(10*1000 / portTICK_PERIOD_MS));
         // printf("Windspeed: %f m/s \n", windspeed);
-    while(1){
-        getWindDirection(&windDirection);
-        printf("Direction: %s \n", windDirection);
-        // vTaskDelay((TickType_t)(1*1000 / portTICK_PERIOD_MS));
+    // while(1){
        
     }
 
