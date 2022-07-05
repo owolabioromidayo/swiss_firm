@@ -1,21 +1,21 @@
 #ifndef PROJ_TYPES_H_
 #define PROJ_TYPES_H_
 
-typedef struct sensor_values_t
+typedef struct 
 {
-    float temp;
+    float internal_temp;
     float ext_temp;
     float humidity;
-    float gas_resistance;
+    int gas_resistance;
     float baro_pressure;
-    float battery_percentage;
-    float solar_irradiance;
+    int battery_percentage;
     float wind_speed;
-    float wind_direction;
-    float rainfall;
+    char* wind_direction;
+    float precipitation_mmhr;
+    int uv;
 } sensor_values_t;
 
-typedef struct wvane_ret
+typedef struct 
 {
     float analog;
     int pos;

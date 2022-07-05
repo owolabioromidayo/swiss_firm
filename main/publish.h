@@ -3,10 +3,13 @@
 
 #include "sensors/ds18b20.h"
 #include "sensors/bme680.h"
-#include "wifi.h"
+#include "sensors/anemometer.h"
+#include "sensors/si1145.h"
+#include "sensors/wind_vane.h"
+#include "sensors/adc_readings.h"
+
 #include "types.h"
 
-
-int send_post();
+sensor_values_t gather_data();
 
 #endif //PROJ_PUBLISH_H_

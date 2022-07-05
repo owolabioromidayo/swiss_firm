@@ -7,7 +7,7 @@ bme680_values_float_t bme680_get_values(void){
 
     memset(&sensor, 0, sizeof(bme680_t));
 
-    ESP_ERROR_CHECK(bme680_init_desc(&sensor, BME680_I2C_ADDR_1, 0, GPIO_SDA, GPIO_SCL));
+    ESP_ERROR_CHECK(bme680_init_desc(&sensor, BME680_I2C_ADDR_0, 0, GPIO_SDA, GPIO_SCL));
 
     bme680_init_sensor(&sensor);
 

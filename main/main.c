@@ -1,11 +1,11 @@
-// #include "wifi.h"
-// #include "wifi_manager.h"
+#include "wifi.h"
+#include "wifi_manager.h"
 // #include "storage.h"
 #include "publish.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 // #include "freertos/event_groups.h"
-// #include <stdio.h>
+#include <stdio.h>
 #include "adc_readings.h"
 #include "esp_sleep.h"
 #include "driver/rtc_io.h"
@@ -18,6 +18,7 @@
 #include "sensors/bme680.h"
 #include "sensors/anemometer.h"
 #include "sensors/ds18b20.h"
+#include "sensors/si1145.h"
 
 #define TAG "weather_station"
 // #define HOUR_MICROS 60*60*1000000
@@ -25,19 +26,21 @@
 #define HOUR_SECS 1*60
 #define SEC_MICROS 1000000l
 #define SLEEP_TIME_MIN 2
-
+#define WIFI_WAIT_PERIOD_MIN 5
 
 static RTC_DATA_ATTR int rainTicks = 0; //keep hourly track
 static RTC_DATA_ATTR time_t elapsed_time = 0;
 static RTC_DATA_ATTR int hourlyTicks = 0; //keep hourly track
 static RTC_DATA_ATTR time_t next = 0;
 static bool wifi_enable = true;
+static bool wifi_connected = false;
+static sensor_values_t v;
 
 
 char* wind_cardinal_map[16] = { "ESE", "ENE", "E", "SSE", "SE", "SSW", "S", "NNE", "NE", "WSW","SW", "NNW", "N"
                             "WNW","NW", "W"};
 
-// static void cb_connection_ok(void *pvParameters);
+static void cb_connection_ok(void *pvParameters);
 static void wakeup_reason(void);
 static void handle_rain_tick(void);
 static void handle_hourly_tick(void);
@@ -50,11 +53,11 @@ void app_main(void)
     // if(elapsed_time == 0)
     //     time(&elapsed_time);
     
-    float windspeed = 0;
+    // float windspeed = 0;
     // int battery_percentage = 0;
-    bool vane_cali_enable = init_wind_vane_adc();
-    init_anemometer_hw();
-    while(1){
+    // bool vane_cali_enable = init_wind_vane_adc();
+    // init_anemometer_hw();
+    // while(1){
         // ESP_LOGI(TAG, "IN LOOP");
 
         // wakeup_reason();
@@ -65,10 +68,27 @@ void app_main(void)
             // wifi_manager_set_callback(WM_EVENT_STA_GOT_IP, &cb_connection_ok);
         // }
 
+    //how much can i store in nvs
+
+    //get values first
+    sensor_values_t v;
+    
+    v.temp = v.ext_temp = v.baro_pressure = v.humidity = v.gas_resistance = v.wind_direction = v.wind_speed = v.battery_percentage = v.solar_irradiance = v.rainfall = 1.5;
+
+    wifi_manager_start();
+    wifi_manager_set_callback(WM_EVENT_STA_GOT_IP, &cb_connection_ok);
+    //set timeout
+
+    //wait for wifi to connect
+    vTaskDelay((TickType_t)(WIFI_WAIT_PERIOD_MIN*60*1000 / portTICK_PERIOD_MS));
+    if(wifi_connected == false)
+        printf("Failed to connect to wifi in time period. Going to sleep\n.");
 
 
-        bme680_get_values();
-        vTaskDelay((TickType_t)(1*1000 / portTICK_PERIOD_MS));
+
+
+        // bme680_get_values();
+        // vTaskDelay((TickType_t)(1*1000 / portTICK_PERIOD_MS));
         // get_ext_temp();
         // xTaskCreatePinnedToCore(measure_windspeed, "measure_windspeed", 8000, (void *)&windspeed, 10, NULL, 0);
         // if (vane_cali_enable)
@@ -99,7 +119,7 @@ void app_main(void)
         // printf("Windspeed: %f m/s \n", windspeed);
     // while(1){
        
-    }
+    // }
 
     // }
 
@@ -170,10 +190,9 @@ static void handle_rain_tick()
    
 }
 
-// static void cb_connection_ok(void *pvParameters)
-// {
-//     //here we get all the values to send
-//     sensor_values_t v;
-//     v.temp = v.ext_temp = v.baro_pressure = v.humidity = v.gas_resistance = v.wind_direction = v.wind_speed = v.battery_percentage = v.solar_irradiance = v.rainfall = 1.5;
-//     post_data(v);
-// }
+static void cb_connection_ok(void *pvParameters)
+{
+    //here we get all the values to send
+    wifi_connected = true;
+    post_data(v);
+}
