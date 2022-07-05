@@ -6,7 +6,7 @@
 #include "sensors/anemometer.h"
 #include "sensors/si1145.h"
 #include "sensors/wind_vane.h"
-#include "sensors/adc_readings.h"
+#include "adc_readings.h"
 
 #include "types.h"
 

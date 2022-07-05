@@ -18,7 +18,6 @@
 #include "sensors/bme680.h"
 #include "sensors/anemometer.h"
 #include "sensors/ds18b20.h"
-#include "sensors/si1145.h"
 
 #define TAG "weather_station"
 // #define HOUR_MICROS 60*60*1000000
@@ -34,8 +33,6 @@ static RTC_DATA_ATTR int hourlyTicks = 0; //keep hourly track
 static RTC_DATA_ATTR time_t next = 0;
 static bool wifi_enable = true;
 static bool wifi_connected = false;
-static sensor_values_t v;
-
 
 char* wind_cardinal_map[16] = { "ESE", "ENE", "E", "SSE", "SE", "SSW", "S", "NNE", "NE", "WSW","SW", "NNW", "N"
                             "WNW","NW", "W"};
@@ -46,83 +43,57 @@ static void handle_rain_tick(void);
 static void handle_hourly_tick(void);
 
 
-
 void app_main(void)
 {
-    // ESP_LOGI(TAG, "IN MAIN FUNC \n");
-    // if(elapsed_time == 0)
-    //     time(&elapsed_time);
+    if(elapsed_time == 0)
+        time(&elapsed_time);
     
-    // float windspeed = 0;
-    // int battery_percentage = 0;
-    // bool vane_cali_enable = init_wind_vane_adc();
-    // init_anemometer_hw();
-    // while(1){
-        // ESP_LOGI(TAG, "IN LOOP");
+    while(1){
 
-        // wakeup_reason();
-        // if (wifi_enable)
-        // {
-            //setup everything here again
-            // wifi_manager_start();
-            // wifi_manager_set_callback(WM_EVENT_STA_GOT_IP, &cb_connection_ok);
-        // }
+        wakeup_reason();
+        if (wifi_enable) // this means it is not just an interrupt from the rain gauge 
+        {
+            wifi_manager_start();
+            wifi_manager_set_callback(WM_EVENT_STA_GOT_IP, &cb_connection_ok);
 
-    //how much can i store in nvs
+            float windspeed = 0;
+            bool vane_cali_enable = init_wind_vane_adc();
+            init_anemometer_hw();
 
-    //get values first
-    sensor_values_t v;
-    
-    v.temp = v.ext_temp = v.baro_pressure = v.humidity = v.gas_resistance = v.wind_direction = v.wind_speed = v.battery_percentage = v.solar_irradiance = v.rainfall = 1.5;
+            sensor_values_t v = gather_data();
+            xTaskCreatePinnedToCore(measure_windspeed, "measure_windspeed", 8000, (void *)&windspeed, 10, NULL, 0);
+            if (vane_cali_enable)
+            {
+                wvane_ret a  = getWindDirection();
+                vTaskDelay((TickType_t)(1*1000 / portTICK_PERIOD_MS));
+                char* winw  = wind_cardinal_map[a.pos];
+                v.wind_direction = winw;
+                printf("Analog: %f, Direction: %d \n", a.analog, a.pos);
+            }
 
-    wifi_manager_start();
-    wifi_manager_set_callback(WM_EVENT_STA_GOT_IP, &cb_connection_ok);
-    //set timeout
-
-    //wait for wifi to connect
-    vTaskDelay((TickType_t)(WIFI_WAIT_PERIOD_MIN*60*1000 / portTICK_PERIOD_MS));
-    if(wifi_connected == false)
-        printf("Failed to connect to wifi in time period. Going to sleep\n.");
+            //wait for wifi connection + wind speed procedure
+            vTaskDelay((TickType_t)(1*60*1000 / portTICK_PERIOD_MS));
 
 
+            if(wifi_connected)
+                post_data(v);
+             else{
+                //longer delayed wait period 
+                vTaskDelay((TickType_t)(WIFI_WAIT_PERIOD_MIN*60*1000 / portTICK_PERIOD_MS));
+                if(wifi_connected)
+                    post_data(v);
+                else
+                    ESP_LOGI(TAG, "Failed to connect to WiFi. Going to sleep. \n");
+            }
+        }
 
+        esp_sleep_enable_timer_wakeup(SLEEP_TIME_MIN*60*SEC_MICROS);
+        esp_sleep_enable_ext0_wakeup(GPIO_RAINGAUGE, 0);
+        esp_sleep_enable_ext0_wakeup(GPIO_ANEMOMETER, 0);
 
-        // bme680_get_values();
-        // vTaskDelay((TickType_t)(1*1000 / portTICK_PERIOD_MS));
-        // get_ext_temp();
-        // xTaskCreatePinnedToCore(measure_windspeed, "measure_windspeed", 8000, (void *)&windspeed, 10, NULL, 0);
-        // if (vane_cali_enable)
-        // {
-        //     wvane_ret a  = getWindDirection();
-        //     vTaskDelay((TickType_t)(1*1000 / portTICK_PERIOD_MS));
-        //     char* winw  = wind_cardinal_map[a.pos];
-        //     printf("Analog: %f, Direction: %d \n", a.analog, a.pos);
-        // }
-        // // xTaskCreatePinnedToCore(measure_rainfall, "measure_rain  fall", 4096, (void *)&rainfall, 10, NULL, 1);
-        // vTaskDelay((TickType_t)(10*1000 / portTICK_PERIOD_MS));
-        // // int percentage = get_battery_percentage();
-        // // ESP_LOGI(TAG, "Battery Percentage: %d percent. \n", percentage);
-
-        // esp_sleep_enable_timer_wakeup(SLEEP_TIME_MIN*60*SEC_MICROS);
-        // esp_sleep_enable_ext0_wakeup(GPIO_RAINGAUGE, 0);
-        // esp_sleep_enable_ext0_wakeup(GPIO_ANEMOMETER, 0);
-
-        // ESP_LOGI(TAG, "Entering DEEP SLEEP \n");
-        // esp_deep_sleep_start();
-        
-
-
-        // xTaskCreatePinnedToCore(get_battery_percentage, "get battery percentage", 4096, (void *)&battery_percentage, 10, NULL, 1);
-       
-        // printf("PERCENTAGE: %d\n", get_battery_percentage());
-        // vTaskDelay((TickType_t)(10*1000 / portTICK_PERIOD_MS));
-        // printf("Windspeed: %f m/s \n", windspeed);
-    // while(1){
-       
-    // }
-
-    // }
-
+        ESP_LOGI(TAG, "Entering DEEP SLEEP \n");
+        esp_deep_sleep_start();
+    }
     return;
 }
 
@@ -135,14 +106,13 @@ static void wakeup_reason(void){
     {
     //Rain Tip Gauge
     case ESP_SLEEP_WAKEUP_EXT0 :
-        ESP_LOGI(TAG, "Wakeup caused by external signal from EXT0\n");
+        ESP_LOGI(TAG, "Wakeup caused by external signal from EXT0/Raingauge\n");
         wifi_enable = false;
         handle_rain_tick();
         ESP_LOGI(TAG, "RainTicks: %d \n", rainTicks);
         break;
-
-
         
+
     case ESP_SLEEP_WAKEUP_TIMER:
         ESP_LOGI(TAG, "Wakeup caused by timer\n");
         wifi_enable = true;
@@ -155,13 +125,6 @@ static void wakeup_reason(void){
         break;
     }
 
-    // float windSpeed = 0;
-    // xTaskCreatePinnedToCore(measure_windspeed, "measure_windspeed", 2048, (void *)&windSpeed, 10, NULL, 1);
-    // vTaskDelay((TickType_t)(17*1000 / portTICK_PERIOD_MS));
-    // printf("Wind Speed recorded: %f \n", windSpeed);
-
-    // getWindDirection();
-    // handle_hourly_tick();
 }
 
 static void handle_hourly_tick(void)
@@ -188,11 +151,10 @@ static void handle_rain_tick()
     next = now + 1;
     rainTicks++;
    
+    handle_hourly_tick();
 }
 
 static void cb_connection_ok(void *pvParameters)
 {
-    //here we get all the values to send
     wifi_connected = true;
-    post_data(v);
 }

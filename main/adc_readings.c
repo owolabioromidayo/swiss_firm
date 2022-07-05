@@ -13,9 +13,7 @@
 #define BATTERY_MULT_FACTOR 1.18
 
 static esp_adc_cal_characteristics_t battery_adc_chars;
-static esp_adc_cal_characteristics_t solar_adc_chars;
 static const adc1_channel_t adc_battery_channel = ADC_BATTERY_PIN;
-static const adc1_channel_t adc_solar_channel = ADC_SOLAR_PANEL_PIN;
 
 static bool init_adc(void)
 {
@@ -33,7 +31,6 @@ static bool init_adc(void)
         esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_10, 0, &battery_adc_chars);
         ESP_ERROR_CHECK(adc1_config_width(ADC_WIDTH_BIT_10));
         ESP_ERROR_CHECK(adc1_config_channel_atten(adc_battery_channel, ADC_ATTEN_DB_11));
-        break;
     }
     else 
         ESP_LOGE(TAG, "Invalid arg");

@@ -23,7 +23,7 @@ void init_anemometer_hw(void)
 
 void measure_windspeed(void *pvParameters)
 {
-    int time_period = 8; //read for set time
+    int time_period = 5; //read for set time
     vTaskDelay((TickType_t)(time_period*1000 / portTICK_PERIOD_MS)); 
 
     gpio_isr_handler_remove(GPIO_ANEMOMETER);
@@ -32,7 +32,7 @@ void measure_windspeed(void *pvParameters)
     float wind_speed_kmh =  ticks_per_second * 2.4 ; 
     float ret =  wind_speed_kmh / 3.6; //wind speed in m/s
 
-    *(float *)pvParameters = ret; //save into passed wind_speed arguemtn
+    *(float *)pvParameters = ret; //save into passed wind_speed argument
     tick_count = 0; //reset tickCount
 
     vTaskDelete(NULL);

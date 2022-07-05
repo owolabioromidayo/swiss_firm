@@ -13,10 +13,6 @@ static int analog_voltage_map[16] = { 210, 270, 300, 410, 600, 790, 930, 1310, 1
                             2670, 2860, 3050 };
 
 
-// char* wind_cardinal_map[16] = { "ESE", "ENE", "E", "SSE", "SE", "SSW", "S", "NNE", "NE", "WSW","SW", "NNW", "N"
-//                             "WNW","NW", "W"};
-
-
 bool init_wind_vane_adc(void)
 {
     esp_err_t ret;
