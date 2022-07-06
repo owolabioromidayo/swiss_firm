@@ -1,4 +1,5 @@
 #include "./si1145.h"
+#include <string.h>
 
 int si1145_get_uv(void){
 

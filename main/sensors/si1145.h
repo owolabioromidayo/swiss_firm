@@ -3,7 +3,6 @@
 
 #include "../config.h"
 #include <si1145.h>
-#include <stdio.h>
 
 int si1145_get_uv(void);
 
