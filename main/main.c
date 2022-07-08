@@ -12,7 +12,9 @@
 #include "esp_timer.h"
 #include "esp_log.h"
 
+#include "utils.h"
 #include "types.h"
+#include "test.h"
 
 #include "sensors/wind_vane.h"
 #include "sensors/bme680.h"
@@ -45,6 +47,11 @@ static void handle_hourly_tick(void);
 
 void app_main(void)
 {
+    if (TEST_MODE){
+        test_all();
+        return;
+    }
+    
     if(elapsed_time == 0)
         time(&elapsed_time);
     
@@ -55,6 +62,9 @@ void app_main(void)
         {
             wifi_manager_start();
             wifi_manager_set_callback(WM_EVENT_STA_GOT_IP, &cb_connection_ok);
+                vTaskDelay((TickType_t)(60*1000 / portTICK_PERIOD_MS));
+
+
 
             float windspeed = 0;
             bool vane_cali_enable = init_wind_vane_adc();
@@ -73,6 +83,8 @@ void app_main(void)
 
             //wait for wifi connection + wind speed procedure
             vTaskDelay((TickType_t)(1*60*1000 / portTICK_PERIOD_MS));
+            printf("Windspeed: %f\n", windspeed);
+            v.wind_speed = windspeed;
 
 
             if(wifi_connected)
@@ -94,7 +106,7 @@ void app_main(void)
         ESP_LOGI(TAG, "Entering DEEP SLEEP \n");
         esp_deep_sleep_start();
     }
-    return;
+    // return;
 }
 
 static void wakeup_reason(void){

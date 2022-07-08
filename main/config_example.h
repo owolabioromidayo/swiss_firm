@@ -5,6 +5,7 @@
 #include "driver/adc.h"
 #include "driver/gpio.h"
 
+#define TEST_MODE 1
 #define WIFI_SSID "ssid"
 #define WIFI_SSID_ESP "esp32_ssid"
 #define WIFI_PASS "pass"
