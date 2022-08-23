@@ -11,6 +11,12 @@ void test_ds18b20(void)
     printf("DS18B20 Test Complete!\n");
 }
 
+void test_guva(void)
+{
+    get_uv_values();
+    printf("GUVAS12SD Test Complete!\n");
+}
+
 void test_bme680(void)
 {
     bme680_get_values();
@@ -27,7 +33,7 @@ void test_si1145(void)
 
 void test_battery_adc(void)
 {
-    bat = get_battery_percentage();
+    int bat = get_battery_percentage();
     printf("Batery Percentage: %d\n", bat );
     printf("Battery Percentage Test Complete!\n");
 
@@ -35,13 +41,14 @@ void test_battery_adc(void)
 
 void test_wind_vane(void)
 {
+    char* wind_cardinal_map[16] = { "ESE", "ENE", "E", "SSE", "SE", "SSW", "S", "NNE", "NE", "WSW","SW", "NNW", "N"
+                                "WNW","NW", "W"};
     bool vane_cali_enable = init_wind_vane_adc();
     if (vane_cali_enable)
     {
         wvane_ret a  = getWindDirection();
         vTaskDelay((TickType_t)(1*1000 / portTICK_PERIOD_MS));
         char* winw  = wind_cardinal_map[a.pos];
-        v.wind_direction = winw;
         printf("Analog: %f, Direction: %d \n", a.analog, a.pos);
     }
 
@@ -54,6 +61,7 @@ void test_all(void)
 {
     test_bme680();
     test_ds18b20();
+    test_si1145();
     test_si1145();
     test_wind_vane();
     test_battery_adc(); 

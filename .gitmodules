@@ -1,0 +1,12 @@
+[submodule "lib/GUVA_S12SD"]
+	path = lib/GUVA_S12SD
+	url = https://github.com/owolabioromidayo/GUVA_S12SD
+[submodule "lib/esp32-wifi-manager"]
+	path = lib/esp32-wifi-manager
+	url = https://github.com/owolabioromidayo/esp32-wifi-manager
+[submodule "lib/Si1145"]
+	path = lib/Si1145
+	url = https://github.com/owolabioromidayo/Si1145
+[submodule "lib/esp-idf-lib"]
+	path = lib/esp-idf-lib
+	url = https://github.com/UncleRus/esp-idf-lib

@@ -1,9 +1,12 @@
 #include "./bme680.h"
+#include <i2cdev.h>
 
 bme680_values_float_t bme680_get_values(void){
 
     bme680_values_float_t values;
     bme680_t sensor;
+
+    i2cdev_init();
 
     memset(&sensor, 0, sizeof(bme680_t));
 
@@ -37,15 +40,14 @@ bme680_values_float_t bme680_get_values(void){
         if (bme680_force_measurement(&sensor) == ESP_OK)
         {
             // passive waiting until measurement results are available
-            // vTaskDelay(duration);
+            vTaskDelay(duration);
 
             // get the results and do something with them
             if (bme680_get_results_float(&sensor, &values) == ESP_OK)
-                printf("BME680 Sensor: %.2f °C, %.2f %%, %.2f hPa, %.2f Ohm\n",
-                        values.temperature, values.humidity, values.pressure, values.gas_resistance);
+                // printf("BME680 Sensor: %.2f °C, %.2f %%, %.2f hPa, %.2f Ohm\n",
+                //         values.temperature, values.humidity, values.pressure, values.gas_resistance);
+                continue; // no more printing values
         }
-        // passive waiting until 1 second is over
-        // vTaskDelayUntil(&last_wakeup, pdMS_TO_TICKS(1000));
     }
     return values;
 }

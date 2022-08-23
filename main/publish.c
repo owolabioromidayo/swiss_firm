@@ -14,8 +14,7 @@ sensor_values_t gather_data(void)
     v.precipitation_mmhr = 0; //filled in from main service tick count
     v.battery_percentage = get_battery_percentage();
     v.wind_speed = 0; //measured on main too
-    //v.wind_direction measured on main too 
-    v.uv = si1145_get_uv();
+    v.uv = get_uv_values();
     
     return v;
 

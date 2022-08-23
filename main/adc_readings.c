@@ -1,15 +1,14 @@
 #include "adc_readings.h"
-#include <stdlib.h>
-#include "esp_adc_cal.h"
-#include "esp_log.h"
 
 #define TAG "adc_readings"
-#define SAMPLE_CNT 50
+#define SAMPLE_CNT 20
 
 // MEASURING RANGES FOR ADC_ATTEN_DB_11  150 mV ~ 2450 mV
 // Also taking into account max input voltage 2100mV and assuming battery is always connected
-#define BATTERY_CUTOFF_LOW 1000
-#define BATTERY_CUTOFF_HIGH 2250 
+#define BATTERY_CUTOFF_LOW 0 
+// #define BATTERY_CUTOFF_LOW 1000
+// #define BATTERY_CUTOFF_HIGH 2250 
+#define BATTERY_CUTOFF_HIGH 4000 
 #define BATTERY_MULT_FACTOR 1.18
 
 static esp_adc_cal_characteristics_t battery_adc_chars;
@@ -48,7 +47,7 @@ int get_battery_percentage(void)
     uint32_t curr_voltage_reading = 0;
     
     for (int i = 0; i < SAMPLE_CNT*4; ++i)
-        adc1_get_raw(adc_battery_channel); //take garbage readings, warm up ADC, sleep
+        adc1_get_raw(adc_battery_channel); //take garbage readings, warm up ADC
 
     if(!cali_enable)
         return -1;
@@ -62,6 +61,7 @@ int get_battery_percentage(void)
             voltage_readings += curr_voltage_reading;
         else 
             i--;    
+        vTaskDelay((TickType_t)(0.001*1000 / portTICK_PERIOD_MS));
     }
 
     float avg_voltage = (BATTERY_MULT_FACTOR * voltage_readings) / (SAMPLE_CNT*1000);

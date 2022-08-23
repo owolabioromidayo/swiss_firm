@@ -24,7 +24,7 @@ wifi_err_t post_data(sensor_values_t v)
     "\"gas_resistance\" : %d, "
     "\"battery_percentage\" : %d, "
     "\"precipitation_mmhr\" : %.2f, "
-    "\"wind_direction\" : %s }"
+    "\"wind_direction\" : \"%s\" }"
     , v.ext_temp, v.internal_temp, v.humidity, v.baro_pressure, v.wind_speed, 
     v.uv, v.gas_resistance, v.battery_percentage, v.precipitation_mmhr,  v.wind_direction);
 

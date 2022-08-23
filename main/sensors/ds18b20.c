@@ -20,7 +20,7 @@ float get_ext_temp(void)
         ds18x20_measure_and_read_multi((gpio_num_t)GPIO_DSB, addrs, sensor_count, temps);
         for (int i = 0; i < sensor_count; i++)
         {
-            printf("sensor-id: %08x temp: %fC\n", (uint32_t)addrs[i], temps[i]);
+            // printf("sensor-id: %08x temp: %fC\n", (uint32_t)addrs[i], temps[i]);
             temp_acc += temps[i];
         }
     }
