@@ -28,17 +28,12 @@ wifi_err_t post_data(sensor_values_t v)
     , v.ext_temp, v.internal_temp, v.humidity, v.baro_pressure, v.wind_speed, 
     v.uv, v.gas_resistance, v.battery_percentage, v.precipitation_mmhr,  v.wind_direction);
 
-    // char* cert = read_tls_cert();
-    // if (!cert){
-    //     printf("TLS certificate not in namespace. Aborting...\n");
-    //     return;
-    // }
 
     esp_http_client_config_t config = {
         .url = HOSTNAME,
         .event_handler = handle_http_event,
         .method = HTTP_METHOD_POST,
-        // .cert_pem = ca_cert
+        .cert_pem = ca_cert
     };
     esp_http_client_handle_t client = esp_http_client_init(&config);
 

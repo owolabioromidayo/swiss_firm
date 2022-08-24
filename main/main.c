@@ -20,6 +20,8 @@
 #include "sensors/wind_vane.h"
 #include "sensors/anemometer.h"
 
+
+
 #define TAG "weather_station"
 #define HOUR_MICROS 60*60*1000000
 #define HOUR_SECS 1*60
@@ -86,7 +88,7 @@ void app_main(void)
 
             wifi_manager_start();
             wifi_manager_set_callback(WM_EVENT_STA_GOT_IP, &cb_connection_ok);
-            // vTaskDelay((TickType_t)(20*1000 / portTICK_PERIOD_MS));
+            vTaskDelay((TickType_t)(30*1000 / portTICK_PERIOD_MS)); //wait for wifi conn
 
             if(wifi_connected)
             {
