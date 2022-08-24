@@ -5,11 +5,11 @@
 
 // MEASURING RANGES FOR ADC_ATTEN_DB_11  150 mV ~ 2450 mV
 // Also taking into account max input voltage 2100mV and assuming battery is always connected
-#define BATTERY_CUTOFF_LOW 0 
-// #define BATTERY_CUTOFF_LOW 1000
-// #define BATTERY_CUTOFF_HIGH 2250 
-#define BATTERY_CUTOFF_HIGH 4000 
-#define BATTERY_MULT_FACTOR 1.18
+// #define BATTERY_CUTOFF_LOW 0 
+#define BATTERY_CUTOFF_LOW 1000
+#define BATTERY_CUTOFF_HIGH 2250 
+// #define BATTERY_CUTOFF_HIGH 4000 
+#define BATTERY_MULT_FACTOR 1.00
 
 static esp_adc_cal_characteristics_t battery_adc_chars;
 static const adc1_channel_t adc_battery_channel = ADC_BATTERY_PIN;

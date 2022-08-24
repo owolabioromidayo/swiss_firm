@@ -21,14 +21,13 @@
 #include "sensors/anemometer.h"
 
 #define TAG "weather_station"
-// #define HOUR_MICROS 60*60*1000000
-#define HOUR_MICROS 60*1000000
+#define HOUR_MICROS 60*60*1000000
 #define HOUR_SECS 1*60
 #define SEC_MICROS 1000000l
-#define SLEEP_TIME_MIN 2
+#define SLEEP_TIME_MIN 30
 #define WIFI_WAIT_PERIOD_MIN 5
 
-static RTC_DATA_ATTR int rainTicks = 0; //keep hourly track
+static RTC_DATA_ATTR int rainTicks = 0; 
 static RTC_DATA_ATTR time_t elapsed_time = 0;
 static RTC_DATA_ATTR int hourlyTicks = 0; //keep hourly track
 static RTC_DATA_ATTR time_t next = 0;
@@ -68,7 +67,7 @@ void app_main(void)
             init_anemometer_hw();
 
             sensor_values_t v = gather_data();
-            printf("Percentage %d \n", v.battery_percentage);
+            v.precipitation_mmhr = hourlyTicks;
 
             xTaskCreatePinnedToCore(measure_windspeed, "measure_windspeed", 2000, (void *)&windspeed, 10, NULL, 0);
             if (vane_cali_enable)
@@ -87,7 +86,7 @@ void app_main(void)
 
             wifi_manager_start();
             wifi_manager_set_callback(WM_EVENT_STA_GOT_IP, &cb_connection_ok);
-            vTaskDelay((TickType_t)(20*1000 / portTICK_PERIOD_MS));
+            // vTaskDelay((TickType_t)(20*1000 / portTICK_PERIOD_MS));
 
             if(wifi_connected)
             {
@@ -106,12 +105,11 @@ void app_main(void)
         }
 
         esp_sleep_enable_timer_wakeup(SLEEP_TIME_MIN*60*SEC_MICROS);
-        // esp_sleep_enable_ext0_wakeup(GPIO_RAINGAUGE, 0);
+        esp_sleep_enable_ext0_wakeup(GPIO_RAINGAUGE, 0);
 
         ESP_LOGI(TAG, "Entering DEEP SLEEP \n");
         esp_deep_sleep_start();
     }
-    // return;
 }
 
 static void wakeup_reason(void){
