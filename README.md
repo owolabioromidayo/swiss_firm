@@ -35,7 +35,7 @@ Project Website: [Link](https://sites.google.com/view/swiss-uidesign/home)
 
 # Setup 
 
-[For an Updated Guide](https://sites.google.com/view/swiss-uidesign/guide/firmware-setup)
+[Updated Guide](https://sites.google.com/view/swiss-uidesign/guide/firmware-setup)
 - Clone this repo
 - Move main/config_example.h to main/config.h.
 - If your hardware connections to the ESP32 are the same as the schematic in the previous section,then you have nothing to edit. If not, edit the pin configurations.
