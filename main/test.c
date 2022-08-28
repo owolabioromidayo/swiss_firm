@@ -61,8 +61,8 @@ void test_all(void)
 {
     test_bme680();
     test_ds18b20();
-    test_si1145();
-    test_si1145();
+//     test_si1145();  // only if you are using an Si1145
+    test_guva();
     test_wind_vane();
     test_battery_adc(); 
 
