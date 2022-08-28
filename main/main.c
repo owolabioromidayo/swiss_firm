@@ -26,8 +26,8 @@
 #define HOUR_MICROS 60*60*1000000
 #define HOUR_SECS 1*60
 #define SEC_MICROS 1000000l
-#define SLEEP_TIME_MIN 30
-#define WIFI_WAIT_PERIOD_MIN 5
+#define SLEEP_TIME_MIN 45 
+#define WIFI_WAIT_PERIOD_MIN 3
 
 static RTC_DATA_ATTR int rainTicks = 0; 
 static RTC_DATA_ATTR time_t elapsed_time = 0;
@@ -82,7 +82,7 @@ void app_main(void)
             }
 
             //wait for wind speed procedure
-            vTaskDelay((TickType_t)(20*1000 / portTICK_PERIOD_MS));
+            vTaskDelay((TickType_t)(10*1000 / portTICK_PERIOD_MS));
             printf("Windspeed: %f\n", windspeed);
             v.wind_speed = windspeed;
 

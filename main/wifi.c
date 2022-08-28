@@ -3,7 +3,7 @@
 #include "utils.h"
 #include "publish.h"
 
-#define MAX_RETRY 10
+#define MAX_RETRY 20
 static const char *TAG = "wifi_service";
 
 static esp_err_t handle_http_event(esp_http_client_event_t *);
