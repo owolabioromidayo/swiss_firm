@@ -10,6 +10,7 @@
 #include "adc_readings.h"
 #include "esp_sleep.h"
 #include "driver/rtc_io.h"
+#include "driver/gpio.h"
 #include "esp_timer.h"
 #include "esp_log.h"
 
@@ -26,9 +27,10 @@
 #define HOUR_MICROS 60*60*1000000
 #define HOUR_SECS 1*60
 #define SEC_MICROS 1000000l
-#define SLEEP_TIME_MIN 45 
+#define SLEEP_TIME_MIN 45
 #define WIFI_WAIT_PERIOD_MIN 3
 
+static uint64_t SLEEP_TIME_MICROS = (uint64_t)SLEEP_TIME_MIN * (uint64_t)SEC_MICROS * 60;
 static RTC_DATA_ATTR int rainTicks = 0; 
 static RTC_DATA_ATTR time_t elapsed_time = 0;
 static RTC_DATA_ATTR int hourlyTicks = 0; //keep hourly track
@@ -57,7 +59,9 @@ void app_main(void)
     if(elapsed_time == 0)
         time(&elapsed_time);
     
+
     while(1){
+
 
         wakeup_reason();
         if (wifi_enable) 
@@ -82,13 +86,11 @@ void app_main(void)
             }
 
             //wait for wind speed procedure
-            vTaskDelay((TickType_t)(10*1000 / portTICK_PERIOD_MS));
-            printf("Windspeed: %f\n", windspeed);
-            v.wind_speed = windspeed;
-
             wifi_manager_start();
             wifi_manager_set_callback(WM_EVENT_STA_GOT_IP, &cb_connection_ok);
-            vTaskDelay((TickType_t)(30*1000 / portTICK_PERIOD_MS)); //wait for wifi conn
+            printf("Windspeed: %f\n", windspeed);
+            v.wind_speed = windspeed;
+            vTaskDelay((TickType_t)(25*1000 / portTICK_PERIOD_MS)); //wait for wifi conn
 
             if(wifi_connected)
             {
@@ -105,10 +107,8 @@ void app_main(void)
                     ESP_LOGI(TAG, "Failed to connect to WiFi. Going to sleep. \n");
             }
         }
-
-        esp_sleep_enable_timer_wakeup(SLEEP_TIME_MIN*60*SEC_MICROS);
+        esp_sleep_enable_timer_wakeup(SLEEP_TIME_MICROS);
         esp_sleep_enable_ext0_wakeup(GPIO_RAINGAUGE, 0);
-
         ESP_LOGI(TAG, "Entering DEEP SLEEP \n");
         esp_deep_sleep_start();
     }
