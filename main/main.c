@@ -20,6 +20,7 @@
 
 #include "sensors/wind_vane.h"
 #include "sensors/anemometer.h"
+#include "soc/rtc_wdt.h"
 
 
 
@@ -60,6 +61,9 @@ void app_main(void)
         time(&elapsed_time);
     
 
+    rtc_wdt_protect_off();
+    rtc_wdt_disable();
+
     while(1){
 
 
@@ -88,9 +92,9 @@ void app_main(void)
             //wait for wind speed procedure
             wifi_manager_start();
             wifi_manager_set_callback(WM_EVENT_STA_GOT_IP, &cb_connection_ok);
+            vTaskDelay((TickType_t)(25*1000 / portTICK_PERIOD_MS)); //wait for wifi conn
             printf("Windspeed: %f\n", windspeed);
             v.wind_speed = windspeed;
-            vTaskDelay((TickType_t)(25*1000 / portTICK_PERIOD_MS)); //wait for wifi conn
 
             if(wifi_connected)
             {
